@@ -61,8 +61,9 @@ print(prices.head())
 Set API credentials as environment variables:
 
 ```bash
+export NORDPOOL_USERNAME="your-username"
+export NORDPOOL_PASSWORD="your-password"
 export ENTSOE_API_KEY="your-key-here"
-export NORDPOOL_API_KEY="your-key-here"
 ```
 
 Or use a `.env` file (see `.env.example`).
