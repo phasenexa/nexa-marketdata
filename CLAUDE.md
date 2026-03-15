@@ -135,6 +135,7 @@ Use pyproject.toml with hatchling or setuptools as the build backend. Don't use 
 
 ## Definition of Done
 
+- Implementation status updated in @README.md
 - Update tests to include new/changed work, aim for >80% code coverage, but prioritise good tests
 - Run tests and ensure they pass using `make ci`
 - If anything changed that would impact the notebooks, run `make execute-notebooks` to update their output

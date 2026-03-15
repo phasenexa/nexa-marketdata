@@ -17,14 +17,19 @@ Handles 15-minute MTU resolution, rate limiting, response caching, timezone norm
 - **Type-safe** — strict mypy compliance, Pydantic v2 models
 - **No floats for money** — all prices and volumes use `Decimal`
 
-## Supported data sources
+## Status
 
-| Exchange | Data types |
+| Component | |
 |---|---|
-| Nord Pool | Day-ahead prices, intraday |
-| ENTSO-E | Day-ahead prices, generation (actual & forecast), load, cross-border flows |
-| EPEX SPOT | Day-ahead prices, intraday |
-| EEX | Futures, spot |
+| Nord Pool — day-ahead prices | ✅ |
+| Core types & exceptions | ✅ |
+| Unified `NexaClient` | 🚧 |
+| ENTSO-E client | ⬜ |
+| EPEX SPOT client | ⬜ |
+| EEX client | ⬜ |
+| Response caching | ⬜ |
+| Rate limiting | ⬜ |
+| Timezone normalisation | ⬜ |
 
 ## Installation
 
