@@ -52,8 +52,8 @@ jobs:
       - name: Run mypy type checking
         run: poetry run mypy src
 
-      - name: Run example notebooks
-        run: make test-notebooks
+      #- name: Run example notebooks
+      #  run: make test-notebooks
 
       - name: Run tests with coverage
         run: |

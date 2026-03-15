@@ -1,5 +1,8 @@
 # nexa-marketdata
 
+[![CI](https://github.com/phasenexa/nexa-marketdata/actions/workflows/ci.yml/badge.svg)](https://github.com/phasenexa/nexa-marketdata/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/phasenexa/nexa-marketdata/graph/badge.svg?token=wuud4Aly4u)](https://codecov.io/gh/phasenexa/nexa-marketdata)
+
 A unified Python client for European power market data sources: Nord Pool, EPEX SPOT, ENTSO-E Transparency Platform, and EEX.
 
 Handles 15-minute MTU resolution, rate limiting, response caching, timezone normalisation, and format differences across exchanges. Part of the [Phase Nexa](https://phasenexa.com) ecosystem.
@@ -58,8 +61,9 @@ print(prices.head())
 Set API credentials as environment variables:
 
 ```bash
+export NORDPOOL_USERNAME="your-username"
+export NORDPOOL_PASSWORD="your-password"
 export ENTSOE_API_KEY="your-key-here"
-export NORDPOOL_API_KEY="your-key-here"
 ```
 
 Or use a `.env` file (see `.env.example`).

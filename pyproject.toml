@@ -36,6 +36,11 @@ hypothesis = ">=6.0"
 mypy = ">=1.10"
 ruff = ">=0.4"
 pandas-stubs = ">=2.0"
+respx = ">=0.20"
+jupyter = ">=1.0"
+nbconvert = ">=7.0"
+ipykernel = ">=6.0"
+matplotlib = ">=3.8"
 
 [build-system]
 requires = ["poetry-core"]
