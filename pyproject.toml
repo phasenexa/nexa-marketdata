@@ -36,6 +36,7 @@ hypothesis = ">=6.0"
 mypy = ">=1.10"
 ruff = ">=0.4"
 pandas-stubs = ">=2.0"
+respx = ">=0.20"
 
 [build-system]
 requires = ["poetry-core"]
