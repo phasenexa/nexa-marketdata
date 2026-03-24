@@ -3,6 +3,8 @@
 [![CI](https://github.com/phasenexa/nexa-marketdata/actions/workflows/ci.yml/badge.svg)](https://github.com/phasenexa/nexa-marketdata/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/phasenexa/nexa-marketdata/graph/badge.svg?token=wuud4Aly4u)](https://codecov.io/gh/phasenexa/nexa-marketdata)
 
+> **Work in progress.** This library is under active development. APIs may change without notice.
+
 A unified Python client for European power market data sources: Nord Pool, EPEX SPOT, ENTSO-E Transparency Platform, and EEX.
 
 Handles 15-minute MTU resolution, rate limiting, response caching, timezone normalisation, and format differences across exchanges. Part of the [Phase Nexa](https://phasenexa.com) ecosystem.
