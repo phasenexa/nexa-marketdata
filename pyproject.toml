@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nexa-marketdata"
-version = "0.1.0b1"
+version = "0.1.0b2"
 description = "Unified API client for European power market data sources"
 authors = ["Phase Nexa <hello@phasenexa.com>"]
 readme = "README.md"
