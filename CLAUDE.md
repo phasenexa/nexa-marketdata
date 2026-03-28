@@ -1,6 +1,7 @@
 # nexa-marketdata
 
 ## What this is
+
 A Python library providing a unified API client for European power market
 data sources: Nord Pool, EPEX SPOT, ENTSO-E Transparency Platform, and EEX.
 Handles 15-minute MTU resolution, rate limiting, response caching, timezone
@@ -8,6 +9,7 @@ normalisation, and format differences across exchanges.
 Part of the Phase Nexa ecosystem.
 
 ## Audience
+
 Quants, data scientists, and developers at energy trading companies who build
 their own trading systems. They are experienced Python users who are currently
 using fragile community wrappers (entsoe-py, kipe/nordpool) or hand-rolled
@@ -15,6 +17,7 @@ API clients. This library replaces all of that with a single, well-maintained
 client.
 
 ## Code style
+
 - Python 3.11+
 - Type hints everywhere, strict mypy compliance
 - Pydantic v2 for data models
@@ -28,6 +31,7 @@ client.
 - Always prefer UK English unless using existing nomenclature popular in energy trading
 
 ## Domain context
+
 - MTU = Market Time Unit. EU power markets transitioned to 15-minute
   MTUs on 30 Sept 2025. Library must handle both 15-min and hourly resolution.
 - ENTSO-E = European Network of Transmission System Operators for Electricity.
@@ -50,6 +54,7 @@ client.
   be cached locally to reduce API load and improve performance.
 
 ## Testing
+
 - pytest with fixtures for common data retrieval scenarios
 - Use VCR.py or responses library to record/replay HTTP interactions
   (never make live API calls in CI)
@@ -59,6 +64,7 @@ client.
 - Run `make test` to run unit tests
 
 ## Do not
+
 - Do not use float for prices or volumes. Use Decimal.
 - Do not create naive datetimes. Always use timezone-aware.
 - Do not add unnecessary dependencies.
@@ -68,6 +74,7 @@ client.
 - Do not scrape Nord Pool's website. Use their official API only.
 
 ## Workflow (Trunk-Based Development)
+
 - **NEVER push directly to main**. The main branch is protected.
 - **Always work on feature branches**: Create a short-lived feature branch for each task (e.g. `feat/add-entsoe-client`, `fix/nordpool-rate-limit`)
 - **Create pull requests**: When work is complete, create a PR to merge into main
@@ -97,7 +104,7 @@ client.
 
 ## Code layout
 
-```
+```text
 nexa-marketdata/
   src/nexa_marketdata/
     __init__.py

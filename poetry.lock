@@ -182,7 +182,7 @@ version = "4.14.3"
 description = "Screen-scraping library"
 optional = false
 python-versions = ">=3.7.0"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "beautifulsoup4-4.14.3-py3-none-any.whl", hash = "sha256:0918bfe44902e6ad8d57732ba310582e98da931428d231a5ecb9e7c703a735bb"},
     {file = "beautifulsoup4-4.14.3.tar.gz", hash = "sha256:6292b1c5186d356bba669ef9f7f051757099565ad9ada5dd630bd9de5fa7fb86"},
@@ -333,7 +333,7 @@ version = "3.4.5"
 description = "The Real First Universal Charset Detector. Open, modern and actively maintained alternative to Chardet."
 optional = false
 python-versions = ">=3.7"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "charset_normalizer-3.4.5-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:4167a621a9a1a986c73777dbc15d4b5eac8ac5c10393374109a343d4013ec765"},
     {file = "charset_normalizer-3.4.5-cp310-cp310-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:3f64c6bf8f32f9133b668c7f7a7cbdbc453412bc95ecdbd157f3b1e377a92990"},
@@ -768,6 +768,24 @@ files = [
     {file = "defusedxml-0.7.1-py2.py3-none-any.whl", hash = "sha256:a352e7e428770286cc899e2542b6cdaedb2b4953ff269a210103ec58f6198a61"},
     {file = "defusedxml-0.7.1.tar.gz", hash = "sha256:1bb3032db185915b62d7c6209c5a8792be6a32ab2fedacc84e01b52c51aa3e69"},
 ]
+
+[[package]]
+name = "entsoe-py"
+version = "0.7.11"
+description = "A python API wrapper for ENTSO-E"
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "entsoe_py-0.7.11-py3-none-any.whl", hash = "sha256:9beeeafb24f8e524511f8a3caf8391e112dce880e8682e22d45d43690ce368b0"},
+    {file = "entsoe_py-0.7.11.tar.gz", hash = "sha256:8f4f8c0c676e2caa9ff0ff3102facfc862101b10ec5e322c92c665935d9b8d1c"},
+]
+
+[package.dependencies]
+beautifulsoup4 = ">=4.11.1"
+pandas = ">=2.2.0"
+pytz = "*"
+requests = "*"
 
 [[package]]
 name = "executing"
@@ -2964,6 +2982,21 @@ files = [
 six = ">=1.5"
 
 [[package]]
+name = "python-dotenv"
+version = "1.2.2"
+description = "Read key-value pairs from a .env file and set them as environment variables"
+optional = false
+python-versions = ">=3.10"
+groups = ["dev"]
+files = [
+    {file = "python_dotenv-1.2.2-py3-none-any.whl", hash = "sha256:1d8214789a24de455a8b8bd8ae6fe3c6b69a5e3d64aa8a8e5d68e694bbcb285a"},
+    {file = "python_dotenv-1.2.2.tar.gz", hash = "sha256:2c371a91fbd7ba082c2c1dc1f8bf89ca22564a087c2c287cd9b662adde799cf3"},
+]
+
+[package.extras]
+cli = ["click (>=5.0)"]
+
+[[package]]
 name = "python-json-logger"
 version = "4.0.0"
 description = "JSON Log Formatter for the Python Logging Package"
@@ -2977,6 +3010,18 @@ files = [
 
 [package.extras]
 dev = ["backports.zoneinfo ; python_version < \"3.9\"", "black", "build", "freezegun", "mdx_truly_sane_lists", "mike", "mkdocs", "mkdocs-awesome-pages-plugin", "mkdocs-gen-files", "mkdocs-literate-nav", "mkdocs-material (>=8.5)", "mkdocstrings[python]", "msgspec ; implementation_name != \"pypy\"", "mypy", "orjson ; implementation_name != \"pypy\"", "pylint", "pytest", "tzdata", "validate-pyproject[all]"]
+
+[[package]]
+name = "pytz"
+version = "2026.1.post1"
+description = "World timezone definitions, modern and historical"
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "pytz-2026.1.post1-py2.py3-none-any.whl", hash = "sha256:f2fd16142fda348286a75e1a524be810bb05d444e5a081f37f7affc635035f7a"},
+    {file = "pytz-2026.1.post1.tar.gz", hash = "sha256:3378dde6a0c3d26719182142c56e60c7f9af7e968076f31aae569d72a0358ee1"},
+]
 
 [[package]]
 name = "pywinpty"
@@ -3216,7 +3261,7 @@ version = "2.32.5"
 description = "Python HTTP for Humans."
 optional = false
 python-versions = ">=3.9"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "requests-2.32.5-py3-none-any.whl", hash = "sha256:2462f94637a34fd532264295e186976db0f5d453d1cdd31473c85a6a161affb6"},
     {file = "requests-2.32.5.tar.gz", hash = "sha256:dbba0bac56e100853db0ea71b82b4dfd5fe2bf6d3754a8893c3af500cec7d7cf"},
@@ -3512,7 +3557,7 @@ version = "2.8.3"
 description = "A modern CSS selector implementation for Beautiful Soup."
 optional = false
 python-versions = ">=3.9"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "soupsieve-2.8.3-py3-none-any.whl", hash = "sha256:ed64f2ba4eebeab06cc4962affce381647455978ffc1e36bb79a545b91f45a95"},
     {file = "soupsieve-2.8.3.tar.gz", hash = "sha256:3267f1eeea4251fb42728b6dfb746edc9acaffc4a45b27e19450b676586e8349"},
@@ -3632,6 +3677,21 @@ docs = ["myst-parser", "pydata-sphinx-theme", "sphinx"]
 test = ["argcomplete (>=3.0.3)", "mypy (>=1.7.0)", "pre-commit", "pytest (>=7.0,<8.2)", "pytest-mock", "pytest-mypy-testing"]
 
 [[package]]
+name = "types-requests"
+version = "2.33.0.20260327"
+description = "Typing stubs for requests"
+optional = false
+python-versions = ">=3.10"
+groups = ["dev"]
+files = [
+    {file = "types_requests-2.33.0.20260327-py3-none-any.whl", hash = "sha256:fde0712be6d7c9a4d490042d6323115baf872d9a71a22900809d0432de15776e"},
+    {file = "types_requests-2.33.0.20260327.tar.gz", hash = "sha256:f4f74f0b44f059e3db420ff17bd1966e3587cdd34062fe38a23cda97868f8dd8"},
+]
+
+[package.dependencies]
+urllib3 = ">=2"
+
+[[package]]
 name = "typing-extensions"
 version = "4.15.0"
 description = "Backported and Experimental Type Hints for Python 3.9+"
@@ -3692,7 +3752,7 @@ version = "2.6.3"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
 optional = false
 python-versions = ">=3.9"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "urllib3-2.6.3-py3-none-any.whl", hash = "sha256:bf272323e553dfb2e87d9bfd225ca7b0f467b919d7bbd355436d3fd37cb0acd4"},
     {file = "urllib3-2.6.3.tar.gz", hash = "sha256:1b62b6884944a57dbe321509ab94fd4d3b307075e0c2eae991ac71ee15ad38ed"},
@@ -3894,4 +3954,4 @@ dev = ["pytest", "setuptools"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "7906c5c4144640ddfa95008167645818aca7aa9d1d160e924ccc5bf3f7a864d5"
+content-hash = "7015dd865019777d7e6a6aeb6769d530ef06bf869696e4e9aa9b8bb081360484"

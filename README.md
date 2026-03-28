@@ -26,7 +26,7 @@ Handles 15-minute MTU resolution, rate limiting, response caching, timezone norm
 | Nord Pool — day-ahead prices | ✅ |
 | Core types & exceptions | ✅ |
 | Unified `NexaClient` | 🚧 |
-| ENTSO-E client | ⬜ |
+| ENTSO-E client | ✅ |
 | EPEX SPOT client | ⬜ |
 | EEX client | ⬜ |
 | Response caching | ⬜ |

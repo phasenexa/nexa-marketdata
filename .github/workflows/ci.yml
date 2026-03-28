@@ -9,6 +9,8 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      ENTSOE_API_KEY: ${{ secrets.ENTSOE_API_KEY }}
     strategy:
       matrix:
         python-version: ["3.11"]
@@ -52,8 +54,8 @@ jobs:
       - name: Run mypy type checking
         run: poetry run mypy src
 
-      #- name: Run example notebooks
-      #  run: make test-notebooks
+      - name: Run example notebooks
+        run: make test-notebooks
 
       - name: Run tests with coverage
         run: |
