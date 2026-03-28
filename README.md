@@ -27,6 +27,7 @@ Handles 15-minute MTU resolution, rate limiting, response caching, timezone norm
 | Core types & exceptions | ✅ |
 | Unified `NexaClient` | 🚧 |
 | ENTSO-E client | ✅ |
+| EXAA client (AT day-ahead) | ✅ |
 | EPEX SPOT client | ⬜ |
 | EEX client | ⬜ |
 | Response caching | ⬜ |
@@ -71,6 +72,10 @@ Set API credentials as environment variables:
 export NORDPOOL_USERNAME="your-username"
 export NORDPOOL_PASSWORD="your-password"
 export ENTSOE_API_KEY="your-key-here"
+export EXAA_USERNAME="your-exaa-username"
+export EXAA_PASSWORD="your-exaa-password"
+export EXAA_PRIVATE_KEY_PATH="/path/to/exaa_private_key.pem"
+export EXAA_CERTIFICATE_PATH="/path/to/exaa_certificate.pem"
 ```
 
 Or use a `.env` file (see `.env.example`).

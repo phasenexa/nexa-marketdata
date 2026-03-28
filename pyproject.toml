@@ -28,6 +28,7 @@ pydantic = ">=2.0"
 pandas = ">=2.0"
 tenacity = ">=8.0"
 entsoe-py = ">=0.6"
+nexa-connect-exaa = {git = "https://github.com/phasenexa/nexa-connect-exaa.git"}
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=8.0"
@@ -60,6 +61,8 @@ ignore = []
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["ANN"]
+# exaa.py wraps an untyped third-party library; Any is unavoidable there.
+"src/nexa_marketdata/exaa.py" = ["ANN401"]
 
 [tool.mypy]
 python_version = "3.11"
@@ -70,6 +73,10 @@ explicit_package_bases = true
 
 [[tool.mypy.overrides]]
 module = ["entsoe", "entsoe.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["nexa_connect_exaa", "nexa_connect_exaa.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

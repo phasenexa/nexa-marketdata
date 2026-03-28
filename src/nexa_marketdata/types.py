@@ -10,6 +10,7 @@ class DataSource(StrEnum):
     ENTSOE = "entsoe"
     EPEX_SPOT = "epex_spot"
     EEX = "eex"
+    EXAA = "exaa"
 
 
 class Resolution(StrEnum):
