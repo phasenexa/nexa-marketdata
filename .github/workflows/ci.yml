@@ -52,12 +52,16 @@ jobs:
       - name: Run mypy type checking
         run: poetry run mypy src
 
-      #- name: Run example notebooks
-      #  run: make test-notebooks
+      - name: Run example notebooks
+        run: make test-notebooks
+        env:
+          ENTSOE_API_KEY: ${{ secrets.ENTSOE_API_KEY }}
 
       - name: Run tests with coverage
         run: |
           poetry run pytest --cov=src/nexa_marketdata --cov-report=xml --cov-report=term
+        env:
+          ENTSOE_API_KEY: ${{ secrets.ENTSOE_API_KEY }}
 
       - name: Check coverage threshold
         run: |

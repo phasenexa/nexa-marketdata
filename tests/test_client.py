@@ -55,15 +55,62 @@ def test_day_ahead_prices_raises_without_nordpool_creds() -> None:
         )
 
 
-def test_day_ahead_prices_raises_for_unsupported_zone() -> None:
-    """GB is not served by any configured source."""
+def test_day_ahead_prices_raises_without_entsoe_key(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """GB zone raises when no ENTSO-E API key is configured."""
+    monkeypatch.delenv("ENTSOE_API_KEY", raising=False)
     client = NexaClient()
-    with pytest.raises(DataNotAvailableError):
+    with pytest.raises(DataNotAvailableError, match="No ENTSO-E API key"):
         client.day_ahead_prices(
             zone=BiddingZone.GB,
             start=datetime.date(2025, 1, 1),
             end=datetime.date(2025, 1, 1),
         )
+
+
+def test_day_ahead_prices_raises_for_zone_in_neither_set(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Zone not in either routing set raises DataNotAvailableError."""
+    import nexa_marketdata.client as client_module
+
+    monkeypatch.setattr(client_module, "_NORDPOOL_ZONES", frozenset())
+    monkeypatch.setattr(client_module, "_ENTSOE_ZONES", frozenset())
+    client = NexaClient()
+    with pytest.raises(DataNotAvailableError, match="No data source available"):
+        client.day_ahead_prices(
+            zone=BiddingZone.NO1,
+            start=datetime.date(2025, 1, 1),
+            end=datetime.date(2025, 1, 1),
+        )
+
+
+def test_day_ahead_prices_delegates_to_entsoe_client(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    mock_df = pd.DataFrame(
+        {"price_eur_mwh": [Decimal("60.00")] * 24},
+        index=pd.date_range("2025-01-01 00:00", periods=24, freq="h", tz="UTC"),
+    )
+    monkeypatch.setenv("ENTSOE_API_KEY", "test-key")
+    client = NexaClient()
+    assert client._entsoe is not None
+    client._entsoe.day_ahead_prices = MagicMock(return_value=mock_df)  # type: ignore[method-assign]
+
+    result = client.day_ahead_prices(
+        zone=BiddingZone.GB,
+        start=datetime.date(2025, 1, 1),
+        end=datetime.date(2025, 1, 1),
+    )
+
+    client._entsoe.day_ahead_prices.assert_called_once_with(
+        BiddingZone.GB,
+        datetime.date(2025, 1, 1),
+        datetime.date(2025, 1, 1),
+        resolution=Resolution.HOURLY,
+    )
+    assert result is mock_df
 
 
 def test_day_ahead_prices_delegates_to_nordpool_client() -> None:

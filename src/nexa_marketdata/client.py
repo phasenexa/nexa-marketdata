@@ -7,6 +7,7 @@ import os
 
 import pandas as pd
 
+from nexa_marketdata.entsoe import ENTSOEClient
 from nexa_marketdata.exceptions import DataNotAvailableError
 from nexa_marketdata.nordpool import NordPoolClient
 from nexa_marketdata.types import BiddingZone, Resolution
@@ -35,6 +36,14 @@ _NORDPOOL_ZONES: frozenset[BiddingZone] = frozenset(
     }
 )
 
+# Zones only available via ENTSO-E (not on Nord Pool Data Portal)
+_ENTSOE_ZONES: frozenset[BiddingZone] = frozenset(
+    {
+        BiddingZone.CH,
+        BiddingZone.GB,
+    }
+)
+
 
 class NexaClient:
     """Unified client for European power market data sources.
@@ -60,6 +69,9 @@ class NexaClient:
             NordPoolClient(username, password) if (username and password) else None
         )
         self._entsoe_api_key = entsoe_api_key or os.environ.get("ENTSOE_API_KEY")
+        self._entsoe = (
+            ENTSOEClient(self._entsoe_api_key) if self._entsoe_api_key else None
+        )
 
     def day_ahead_prices(
         self,
@@ -91,6 +103,15 @@ class NexaClient:
                     "NORDPOOL_USERNAME/NORDPOOL_PASSWORD environment variables."
                 )
             return self._nordpool.day_ahead_prices(
+                zone, start, end, resolution=resolution
+            )
+        if zone in _ENTSOE_ZONES:
+            if self._entsoe is None:
+                raise DataNotAvailableError(
+                    f"No ENTSO-E API key configured for zone {zone!r}. "
+                    "Set entsoe_api_key or the ENTSOE_API_KEY environment variable."
+                )
+            return self._entsoe.day_ahead_prices(
                 zone, start, end, resolution=resolution
             )
         raise DataNotAvailableError(
