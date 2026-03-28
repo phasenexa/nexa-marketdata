@@ -115,7 +115,6 @@ class ENTSOEClient:
             ) from exc
         except requests.exceptions.HTTPError as exc:
             _raise_for_http_error(exc)
-            raise  # unreachable; satisfies type checker
         except Exception as exc:
             raise ExchangeAPIError(f"ENTSO-E API error: {exc}") from exc
 
