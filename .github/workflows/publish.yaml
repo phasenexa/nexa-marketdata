@@ -92,9 +92,13 @@ jobs:
 
       - name: Run example notebooks
         run: make test-notebooks
+        env:
+          ENTSOE_API_KEY: ${{ secrets.ENTSOE_API_KEY }}
 
       - name: Run tests with coverage
         run: poetry run pytest --cov=src/nexa_marketdata --cov-report=xml --cov-report=term
+        env:
+          ENTSOE_API_KEY: ${{ secrets.ENTSOE_API_KEY }}
 
       - name: Check coverage threshold
         run: poetry run coverage report --fail-under=80
