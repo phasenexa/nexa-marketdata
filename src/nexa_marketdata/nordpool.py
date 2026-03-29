@@ -135,8 +135,7 @@ class NordPoolClient:
         """
         if zone not in _ZONE_TO_AREA:
             raise DataNotAvailableError(
-                f"Bidding zone {zone!r} is not supported on Nord Pool. "
-                "Zone GB (N2EX) is not available via this client."
+                f"Bidding zone {zone!r} is not supported on Nord Pool."
             )
 
         area = _ZONE_TO_AREA[zone]

@@ -74,7 +74,10 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "--cov=src/nexa_marketdata --cov-report=term-missing --cov-report=xml"
+addopts = "--cov=src/nexa_marketdata --cov-report=term-missing --cov-report=xml -m 'not live'"
+markers = [
+    "live: marks tests that call live external APIs (deselected by default; run with -m live)",
+]
 
 [tool.coverage.run]
 source = ["src/nexa_marketdata"]

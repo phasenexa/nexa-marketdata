@@ -24,10 +24,18 @@ from nexa_marketdata.types import BiddingZone
 # Helpers
 # ---------------------------------------------------------------------------
 
-_LIVE = pytest.mark.skipif(
-    not os.environ.get("ENTSOE_API_KEY"),
-    reason="ENTSOE_API_KEY environment variable not set",
-)
+
+def _LIVE(f):  # noqa: N802
+    """Marks a test as a live integration test (excluded from default CI run).
+
+    Requires the ENTSOE_API_KEY environment variable to be set; skips otherwise.
+    """
+    f = pytest.mark.live(f)
+    f = pytest.mark.skipif(
+        not os.environ.get("ENTSOE_API_KEY"),
+        reason="ENTSOE_API_KEY environment variable not set",
+    )(f)
+    return f
 
 
 def _make_price_series(
@@ -274,6 +282,124 @@ def test_unexpected_exception_raises_exchange_api_error(client: ENTSOEClient) ->
             datetime.date(2025, 1, 1),
             datetime.date(2025, 1, 1),
         )
+
+
+# ---------------------------------------------------------------------------
+# Retry behaviour
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture(autouse=True)
+def _no_retry_sleep(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Suppress tenacity sleep so retry tests run instantly."""
+    import tenacity.nap
+
+    monkeypatch.setattr(tenacity.nap, "sleep", lambda _: None)
+
+
+def _make_503_error() -> requests.exceptions.HTTPError:
+    mock_response = MagicMock()
+    mock_response.status_code = 503
+    return requests.exceptions.HTTPError(response=mock_response)
+
+
+def test_503_is_retried_and_succeeds_on_second_attempt(
+    client: ENTSOEClient,
+) -> None:
+    """A single 503 should be retried; second call returning data succeeds."""
+    series = _make_price_series()
+    mock_query = MagicMock(side_effect=[_make_503_error(), series])
+    with patch.object(client._client, "query_day_ahead_prices", mock_query):
+        df = client.day_ahead_prices(
+            BiddingZone.FR,
+            datetime.date(2025, 1, 1),
+            datetime.date(2025, 1, 1),
+        )
+    assert mock_query.call_count == 2
+    assert isinstance(df, pd.DataFrame)
+
+
+def test_503_exhausts_retries_and_raises_exchange_api_error(
+    client: ENTSOEClient,
+) -> None:
+    """Three consecutive 503 responses should raise ExchangeAPIError."""
+    mock_query = MagicMock(side_effect=[_make_503_error()] * 3)
+    with (
+        patch.object(client._client, "query_day_ahead_prices", mock_query),
+        pytest.raises(ExchangeAPIError),
+    ):
+        client.day_ahead_prices(
+            BiddingZone.FR,
+            datetime.date(2025, 1, 1),
+            datetime.date(2025, 1, 1),
+        )
+    assert mock_query.call_count == 3
+
+
+def test_connection_error_is_retried(client: ENTSOEClient) -> None:
+    """ConnectionError should trigger retries."""
+    series = _make_price_series()
+    conn_error = requests.exceptions.ConnectionError("connection refused")
+    mock_query = MagicMock(side_effect=[conn_error, series])
+    with patch.object(client._client, "query_day_ahead_prices", mock_query):
+        df = client.day_ahead_prices(
+            BiddingZone.FR,
+            datetime.date(2025, 1, 1),
+            datetime.date(2025, 1, 1),
+        )
+    assert mock_query.call_count == 2
+    assert isinstance(df, pd.DataFrame)
+
+
+def test_timeout_error_is_retried(client: ENTSOEClient) -> None:
+    """Timeout should trigger retries."""
+    series = _make_price_series()
+    timeout = requests.exceptions.Timeout("timed out")
+    mock_query = MagicMock(side_effect=[timeout, series])
+    with patch.object(client._client, "query_day_ahead_prices", mock_query):
+        df = client.day_ahead_prices(
+            BiddingZone.FR,
+            datetime.date(2025, 1, 1),
+            datetime.date(2025, 1, 1),
+        )
+    assert mock_query.call_count == 2
+    assert isinstance(df, pd.DataFrame)
+
+
+def test_403_is_not_retried(client: ENTSOEClient) -> None:
+    """Auth errors must not be retried."""
+    mock_response = MagicMock()
+    mock_response.status_code = 403
+    exc = requests.exceptions.HTTPError(response=mock_response)
+    mock_query = MagicMock(side_effect=exc)
+    with (
+        patch.object(client._client, "query_day_ahead_prices", mock_query),
+        pytest.raises(AuthenticationError),
+    ):
+        client.day_ahead_prices(
+            BiddingZone.FR,
+            datetime.date(2025, 1, 1),
+            datetime.date(2025, 1, 1),
+        )
+    assert mock_query.call_count == 1
+
+
+def test_429_is_not_retried(client: ENTSOEClient) -> None:
+    """Rate-limit errors must not be retried."""
+    mock_response = MagicMock()
+    mock_response.status_code = 429
+    exc = requests.exceptions.HTTPError(response=mock_response)
+    mock_query = MagicMock(side_effect=exc)
+    with (
+        patch.object(client._client, "query_day_ahead_prices", mock_query),
+        pytest.raises(RateLimitError),
+    ):
+        client.day_ahead_prices(
+            BiddingZone.FR,
+            datetime.date(2025, 1, 1),
+            datetime.date(2025, 1, 1),
+        )
+    assert mock_query.call_count == 1
 
 
 def test_unsupported_zone_raises_data_not_available(client: ENTSOEClient) -> None:

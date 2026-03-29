@@ -7,7 +7,9 @@
 
 A unified Python client for European power market data sources: Nord Pool, EPEX SPOT, ENTSO-E Transparency Platform, and EEX.
 
-Handles 15-minute MTU resolution, rate limiting, response caching, timezone normalisation, and format differences across exchanges. Part of the [Phase Nexa](https://phasenexa.com) ecosystem.
+🇳🇴 🇸🇪 🇩🇰 🇫🇮 🇪🇪 🇱🇻 🇱🇹 🇩🇪 🇱🇺 🇫🇷 🇧🇪 🇳🇱 🇦🇹 🇨🇭 🇪🇸 🇵🇹 🇨🇿 🇸🇰 🇭🇺 🇷🇴 🇧🇬 🇸🇮 🇭🇷 🇵🇱 🇷🇸 🇧🇦 🇲🇪 🇲🇰 🇦🇱 🇽🇰 🇲🇩 🇮🇹 🇬🇧 🇮🇪 🇨🇾 🇲🇹 🇮🇸 🇬🇪 🇧🇾 🇺🇦 🇹🇷
+
+Handles 15-minute MTU resolution, rate limiting, response caching, timezone normalisation, and format differences across exchanges. Part of the [Phase Nexa](https://phasenexa.github.io) ecosystem.
 
 ## Features
 
@@ -50,7 +52,7 @@ poetry add nexa-marketdata
 ```python
 from nexa_marketdata import NexaClient
 from nexa_marketdata.types import BiddingZone
-import datetime, zoneinfo
+import datetime
 
 client = NexaClient()
 
@@ -109,7 +111,14 @@ make execute-notebooks  # re-execute example notebooks
 make test
 ```
 
-Tests use recorded HTTP fixtures (VCR cassettes) — no live API calls required.
+Unit tests use mocked HTTP responses — no live API calls or credentials required.
+
+Integration tests that call live APIs are excluded from the default run. To run them:
+
+```bash
+export ENTSOE_API_KEY="your-key-here"
+poetry run pytest -m live
+```
 
 ## Contributing
 
