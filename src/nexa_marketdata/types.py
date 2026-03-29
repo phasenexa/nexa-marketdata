@@ -36,6 +36,11 @@ class BiddingZone(StrEnum):
     DK2 = "DK2"
     FI = "FI"
 
+    # Baltic
+    EE = "EE"
+    LV = "LV"
+    LT = "LT"
+
     # Central Western Europe
     DE_LU = "DE-LU"
     FR = "FR"
@@ -44,6 +49,49 @@ class BiddingZone(StrEnum):
     AT = "AT"
     CH = "CH"
 
-    # Other
-    GB = "GB"
+    # Iberian Peninsula
+    ES = "ES"
+    PT = "PT"
+
+    # Central & Eastern Europe
+    CZ = "CZ"
+    SK = "SK"
+    HU = "HU"
+    RO = "RO"
+    BG = "BG"
+    SI = "SI"
+    HR = "HR"
     PL = "PL"
+
+    # Western Balkans
+    RS = "RS"
+    BA = "BA"
+    ME = "ME"
+    MK = "MK"
+    AL = "AL"
+    XK = "XK"
+    MD = "MD"
+
+    # Italy (separate bidding zones)
+    IT_NORD = "IT-NORD"
+    IT_CNOR = "IT-CNOR"
+    IT_CSUD = "IT-CSUD"
+    IT_SUD = "IT-SUD"
+    IT_SARD = "IT-SARD"
+    IT_SICI = "IT-SICI"
+    IT_CALA = "IT-CALA"
+
+    # British Isles
+    GB = "GB"
+    IE_SEM = "IE-SEM"
+
+    # Islands / small markets
+    CY = "CY"
+    MT = "MT"
+    IS = "IS"
+
+    # Other ENTSO-E members
+    GE = "GE"
+    BY = "BY"
+    UA = "UA"
+    TR = "TR"

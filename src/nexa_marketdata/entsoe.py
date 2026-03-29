@@ -16,6 +16,7 @@ import pandas as pd
 import requests
 from entsoe import EntsoePandasClient  # type: ignore[attr-defined]
 from entsoe.exceptions import NoMatchingDataError
+from tenacity import retry, retry_if_exception, stop_after_attempt, wait_exponential
 
 from nexa_marketdata.exceptions import (
     AuthenticationError,
@@ -28,6 +29,7 @@ from nexa_marketdata.types import BiddingZone, Resolution
 # Map BiddingZone to entsoe-py area identifiers.
 # ENTSO-E uses underscored names for sub-national zones (e.g. NO_1, SE_1).
 _ZONE_TO_AREA: dict[BiddingZone, str] = {
+    # Nordic
     BiddingZone.NO1: "NO_1",
     BiddingZone.NO2: "NO_2",
     BiddingZone.NO3: "NO_3",
@@ -40,15 +42,75 @@ _ZONE_TO_AREA: dict[BiddingZone, str] = {
     BiddingZone.DK1: "DK_1",
     BiddingZone.DK2: "DK_2",
     BiddingZone.FI: "FI",
+    # Baltic
+    BiddingZone.EE: "EE",
+    BiddingZone.LV: "LV",
+    BiddingZone.LT: "LT",
+    # Central Western Europe
     BiddingZone.DE_LU: "DE_LU",
     BiddingZone.FR: "FR",
     BiddingZone.BE: "BE",
     BiddingZone.NL: "NL",
     BiddingZone.AT: "AT",
     BiddingZone.CH: "CH",
-    BiddingZone.GB: "GB",
+    # Iberian Peninsula
+    BiddingZone.ES: "ES",
+    BiddingZone.PT: "PT",
+    # Central & Eastern Europe
+    BiddingZone.CZ: "CZ",
+    BiddingZone.SK: "SK",
+    BiddingZone.HU: "HU",
+    BiddingZone.RO: "RO",
+    BiddingZone.BG: "BG",
+    BiddingZone.SI: "SI",
+    BiddingZone.HR: "HR",
     BiddingZone.PL: "PL",
+    # Western Balkans
+    BiddingZone.RS: "RS",
+    BiddingZone.BA: "BA",
+    BiddingZone.ME: "ME",
+    BiddingZone.MK: "MK",
+    BiddingZone.AL: "AL",
+    BiddingZone.XK: "XK",
+    BiddingZone.MD: "MD",
+    # Italy
+    BiddingZone.IT_NORD: "IT_NORD",
+    BiddingZone.IT_CNOR: "IT_CNOR",
+    BiddingZone.IT_CSUD: "IT_CSUD",
+    BiddingZone.IT_SUD: "IT_SUD",
+    BiddingZone.IT_SARD: "IT_SARD",
+    BiddingZone.IT_SICI: "IT_SICI",
+    BiddingZone.IT_CALA: "IT_CALA",
+    # British Isles
+    BiddingZone.GB: "GB",
+    BiddingZone.IE_SEM: "IE_SEM",
+    # Islands / small markets
+    BiddingZone.CY: "CY",
+    BiddingZone.MT: "MT",
+    BiddingZone.IS: "IS",
+    # Other ENTSO-E members
+    BiddingZone.GE: "GE",
+    BiddingZone.BY: "BY",
+    BiddingZone.UA: "UA",
+    BiddingZone.TR: "TR",
 }
+
+
+def _is_transient_entsoe_error(exc: BaseException) -> bool:
+    """Return True for transient ENTSO-E errors that are safe to retry.
+
+    Retries on 503 Service Unavailable (common with the ENTSO-E Transparency
+    Platform), as well as low-level connection and timeout failures.
+    Auth errors (401/403) and rate-limit errors (429) are not retried.
+    """
+    if isinstance(
+        exc, (requests.exceptions.ConnectionError, requests.exceptions.Timeout)
+    ):
+        return True
+    if isinstance(exc, requests.exceptions.HTTPError):
+        response = exc.response
+        return response is not None and response.status_code == 503
+    return False
 
 
 class ENTSOEClient:
@@ -106,9 +168,7 @@ class ENTSOEClient:
         pd_end = pd.Timestamp(end + datetime.timedelta(days=1), tz="UTC")
 
         try:
-            series: pd.Series[Any] = self._client.query_day_ahead_prices(
-                area, start=pd_start, end=pd_end
-            )
+            series: pd.Series[Any] = self._query_with_retry(area, pd_start, pd_end)
         except NoMatchingDataError as exc:
             raise DataNotAvailableError(
                 f"No day-ahead prices available for {zone!r} between {start} and {end}."
@@ -119,6 +179,25 @@ class ENTSOEClient:
             raise ExchangeAPIError(f"ENTSO-E API error: {exc}") from exc
 
         return _series_to_dataframe(series)
+
+    @retry(
+        retry=retry_if_exception(_is_transient_entsoe_error),
+        wait=wait_exponential(multiplier=1, min=1, max=10),
+        stop=stop_after_attempt(3),
+        reraise=True,
+    )
+    def _query_with_retry(
+        self,
+        area: str,
+        pd_start: pd.Timestamp,
+        pd_end: pd.Timestamp,
+    ) -> pd.Series[Any]:
+        """Call the underlying entsoe-py client with retry on transient errors.
+
+        Retries up to 3 times with exponential back-off (1 s, 2 s, 4 s capped
+        at 10 s) on 503 responses, connection errors, and timeouts.
+        """
+        return self._client.query_day_ahead_prices(area, start=pd_start, end=pd_end)
 
 
 def _raise_for_http_error(exc: requests.exceptions.HTTPError) -> None:
