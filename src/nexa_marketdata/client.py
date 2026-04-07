@@ -9,10 +9,10 @@ import pandas as pd
 
 from nexa_marketdata.entsoe import ENTSOEClient
 from nexa_marketdata.exceptions import DataNotAvailableError
-from nexa_marketdata.nordpool import NordPoolClient
+from nexa_marketdata.nordpool import NordPoolAuctionClient, NordPoolClient
 from nexa_marketdata.types import BiddingZone, Resolution
 
-# Zones served by Nord Pool Data Portal.
+# Zones served by Nord Pool Market Data API and Auction API.
 _NORDPOOL_ZONES: frozenset[BiddingZone] = frozenset(
     {
         BiddingZone.NO1,
@@ -36,6 +36,10 @@ _NORDPOOL_ZONES: frozenset[BiddingZone] = frozenset(
     }
 )
 
+# Zones served by the Nord Pool Auction API (subset of _NORDPOOL_ZONES;
+# DE_LU is excluded because the CWE product does not expose a "GER" area code).
+_NORDPOOL_AUCTION_ZONES: frozenset[BiddingZone] = _NORDPOOL_ZONES - {BiddingZone.DE_LU}
+
 # Zones served by ENTSO-E Transparency Platform (all known bidding zones).
 _ENTSOE_ZONES: frozenset[BiddingZone] = frozenset(BiddingZone)
 
@@ -48,8 +52,15 @@ _SOURCES: list[tuple[str, frozenset[BiddingZone], str, str]] = [
         "_nordpool",
         _NORDPOOL_ZONES,
         "Nord Pool",
-        "Set nordpool_username/nordpool_password or "
-        "NORDPOOL_USERNAME/NORDPOOL_PASSWORD environment variables.",
+        "Set nordpool_marketdata_username/nordpool_marketdata_password or "
+        "NORDPOOL_MARKETDATA_USERNAME/NORDPOOL_MARKETDATA_PASSWORD env vars.",
+    ),
+    (
+        "_nordpool_auction",
+        _NORDPOOL_AUCTION_ZONES,
+        "Nord Pool Auction",
+        "Set nordpool_auction_username/nordpool_auction_password or "
+        "NORDPOOL_AUCTION_USERNAME/NORDPOOL_AUCTION_PASSWORD environment variables.",
     ),
     (
         "_entsoe",
@@ -65,26 +76,59 @@ _SOURCES: list[tuple[str, frozenset[BiddingZone], str, str]] = [
 class NexaClient:
     """Unified client for European power market data sources.
 
+    Sources are tried in priority order:
+
+    1. **Nord Pool Market Data API** — preferred when available; single call per
+       day, no history cap. Requires a separate paid subscription.
+    2. **Nord Pool Auction API** — fallback for DA trading members who do not
+       have a Market Data subscription. Limited to the past 7 days.
+    3. **ENTSO-E** — final fallback; covers all bidding zones but may differ
+       slightly in granularity and availability.
+
+    At least one source must be configured. ENTSO-E alone is sufficient for
+    zones outside Nord Pool's coverage.
+
     Args:
-        nordpool_username: Nord Pool account username. Falls back to
-            ``NORDPOOL_USERNAME`` environment variable.
-        nordpool_password: Nord Pool account password. Falls back to
-            ``NORDPOOL_PASSWORD`` environment variable.
+        nordpool_marketdata_username: Nord Pool Market Data API username. Falls
+            back to ``NORDPOOL_MARKETDATA_USERNAME`` environment variable.
+        nordpool_marketdata_password: Nord Pool Market Data API password. Falls
+            back to ``NORDPOOL_MARKETDATA_PASSWORD`` environment variable.
+        nordpool_auction_username: Nord Pool Auction API username. Falls back to
+            ``NORDPOOL_AUCTION_USERNAME`` environment variable.
+        nordpool_auction_password: Nord Pool Auction API password. Falls back to
+            ``NORDPOOL_AUCTION_PASSWORD`` environment variable.
         entsoe_api_key: ENTSO-E Transparency Platform security token. Falls
             back to ``ENTSOE_API_KEY`` environment variable.
     """
 
     def __init__(
         self,
-        nordpool_username: str | None = None,
-        nordpool_password: str | None = None,
+        nordpool_marketdata_username: str | None = None,
+        nordpool_marketdata_password: str | None = None,
+        nordpool_auction_username: str | None = None,
+        nordpool_auction_password: str | None = None,
         entsoe_api_key: str | None = None,
     ) -> None:
-        username = nordpool_username or os.environ.get("NORDPOOL_USERNAME")
-        password = nordpool_password or os.environ.get("NORDPOOL_PASSWORD")
-        self._nordpool = (
-            NordPoolClient(username, password) if (username and password) else None
+        md_user = nordpool_marketdata_username or os.environ.get(
+            "NORDPOOL_MARKETDATA_USERNAME"
         )
+        md_pass = nordpool_marketdata_password or os.environ.get(
+            "NORDPOOL_MARKETDATA_PASSWORD"
+        )
+        self._nordpool = (
+            NordPoolClient(md_user, md_pass) if (md_user and md_pass) else None
+        )
+
+        au_user = nordpool_auction_username or os.environ.get(
+            "NORDPOOL_AUCTION_USERNAME"
+        )
+        au_pass = nordpool_auction_password or os.environ.get(
+            "NORDPOOL_AUCTION_PASSWORD"
+        )
+        self._nordpool_auction = (
+            NordPoolAuctionClient(au_user, au_pass) if (au_user and au_pass) else None
+        )
+
         self._entsoe_api_key = entsoe_api_key or os.environ.get("ENTSOE_API_KEY")
         self._entsoe = (
             ENTSOEClient(self._entsoe_api_key) if self._entsoe_api_key else None
@@ -99,9 +143,10 @@ class NexaClient:
     ) -> pd.DataFrame:
         """Retrieve day-ahead electricity prices for a bidding zone.
 
-        Sources are tried in priority order (Nord Pool first, then ENTSO-E).
-        A source is skipped when its credentials are not configured, allowing
-        automatic fallthrough to the next available source.
+        Sources are tried in priority order (Nord Pool Market Data first, then
+        Nord Pool Auction, then ENTSO-E). A source is skipped when its
+        credentials are not configured, allowing automatic fallthrough to the
+        next available source.
 
         Args:
             zone: The bidding zone to retrieve prices for.

@@ -25,7 +25,8 @@ Handles 15-minute MTU resolution, rate limiting, response caching, timezone norm
 
 | Component | |
 |---|---|
-| Nord Pool — day-ahead prices | ✅ |
+| Nord Pool — day-ahead prices (Market Data API) | ✅ |
+| Nord Pool — day-ahead prices (Auction API fallback) | ✅ |
 | Core types & exceptions | ✅ |
 | Unified `NexaClient` | 🚧 |
 | ENTSO-E client | ✅ |
@@ -70,12 +71,32 @@ print(prices.head())
 Set API credentials as environment variables:
 
 ```bash
-export NORDPOOL_USERNAME="your-username"
-export NORDPOOL_PASSWORD="your-password"
+# For Nord Pool Market Data API subscribers (preferred, no history cap):
+export NORDPOOL_MARKETDATA_USERNAME="your-username"
+export NORDPOOL_MARKETDATA_PASSWORD="your-password"
+
+# For Nord Pool DA trading participants (Auction API, fallback):
+export NORDPOOL_AUCTION_USERNAME="your-username"
+export NORDPOOL_AUCTION_PASSWORD="your-password"
+
+# At least one Nord Pool credential set OR the ENTSO-E key is required.
 export ENTSOE_API_KEY="your-key-here"
 ```
 
 Or use a `.env` file (see `.env.example`).
+
+### Source priority and limitations
+
+If both Nord Pool credential sets are configured, the Market Data API is tried first
+(it has no history cap and returns data in a single call per day). The Auction API is
+used as a fallback for those without a Market Data subscription, but is limited to the
+**past 7 days** of data. ENTSO-E is the final fallback and covers all bidding zones.
+
+At least one source must be configured for Nord Pool zones; ENTSO-E alone is sufficient
+for zones outside Nord Pool's coverage (e.g. `BiddingZone.GB`, `BiddingZone.IT_NORD`).
+
+> **Note:** `BiddingZone.DE_LU` (Germany-Luxembourg) is not currently resolvable via the
+> Auction API and will fall through to ENTSO-E when only Auction credentials are configured.
 
 ## Development
 
