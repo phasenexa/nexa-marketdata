@@ -471,7 +471,8 @@ def _aggregate_qh_to_hourly(df: pd.DataFrame) -> pd.DataFrame:
     if df.empty:
         return df
 
-    hourly_index = df.index.floor("h")
+    dt_index = pd.DatetimeIndex(df.index)
+    hourly_index = dt_index.floor("h")
     result_timestamps: list[datetime.datetime] = []
     result_prices: list[Any] = []
 
