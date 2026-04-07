@@ -900,3 +900,48 @@ def test_parse_auction_prices_response_null_becomes_na() -> None:
     ]
     df = _parse_auction_prices_response(data, area="NO1", currency="EUR")
     assert pd.isna(df["price_eur_mwh"].iloc[0])
+
+
+def test_parse_auction_prices_response_handles_naive_datetime() -> None:
+    """Naive deliveryStart timestamps (no timezone) are treated as UTC."""
+    data = [
+        {
+            "auction": "NOR_QH_DA_1-20241231",
+            "contracts": [
+                {
+                    "contractId": "c1",
+                    "deliveryStart": "2024-12-31T23:00:00",  # no Z / offset
+                    "deliveryEnd": "2024-12-31T23:15:00",
+                    "areas": [
+                        {
+                            "areaCode": "NO1",
+                            "prices": [
+                                {
+                                    "currencyCode": "EUR",
+                                    "marketPrice": 45.0,
+                                    "status": "Final",
+                                }
+                            ],
+                        }
+                    ],
+                }
+            ],
+        }
+    ]
+    df = _parse_auction_prices_response(data, area="NO1", currency="EUR")
+    assert df.index[0] == pd.Timestamp("2024-12-31T23:00:00", tz="UTC")
+
+
+def test_empty_date_range_returns_empty_dataframe(
+    client: NordPoolAuctionClient,
+) -> None:
+    """start > end yields an empty DataFrame without making any HTTP requests."""
+    with respx.mock:
+        df = client.day_ahead_prices(
+            BiddingZone.NO1,
+            start=datetime.date(2025, 1, 5),
+            end=datetime.date(2025, 1, 4),  # end before start
+        )
+    assert df.empty
+    assert "price_eur_mwh" in df.columns
+    assert not respx.calls
